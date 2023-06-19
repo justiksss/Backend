@@ -1,3 +1,4 @@
+from starlette.middleware.cors import CORSMiddleware
 
 from src.routers.user import user_router
 from src.routers.login import login_router
@@ -16,3 +17,15 @@ app.include_router(login_router, prefix="/login", tags=["login"])
 app.include_router(news_router,prefix="/news", tags=["news"])
 # app.include_router(job_router, prefix="/job", tags=['job'])
 
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
+    allow_headers=["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
+                   "Authorization"],
+)

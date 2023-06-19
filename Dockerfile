@@ -11,5 +11,5 @@ RUN poetry install --no-dev
 
 COPY . .
 
-
-CMD ["sh", "-c", "gunicorn -w 1 -b 0.0.0.0:8000 main:app"]
+CMD gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
+#CMD ["sh", "-c", "gunicorn -w 1 -b 0.0.0.0:8000 main:app"]
