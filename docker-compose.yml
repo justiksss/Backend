@@ -5,9 +5,9 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres_password
     container_name: db_app
-    command: -p 1221
+    command: -p 6543
     expose:
-      - 1221
+      - 6543
     env_file:
       - .env
 
@@ -20,6 +20,3 @@ services:
     command: [ "/fastapi_app/app.sh" ]
     ports:
       - 9999:8000
-    depends_on:
-      db:
-        condition: service_completed_successfully
