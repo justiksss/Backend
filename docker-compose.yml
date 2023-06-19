@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: postgres_password
+    container_name: db_app
+    command: -p 1221
+    expose:
+      - 1221
+    env_file:
+      - .env
+
+  app:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: fastapi_app
+    command: [ "/fastapi_app/app.sh" ]
+    ports:
+      - 9999:8000
+    depends_on:
+      db:
+        condition: service_completed_successfully
