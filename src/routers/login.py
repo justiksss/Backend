@@ -6,11 +6,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from app.api.handlers.login import authenticate_user
-from app.api.schemas.old_schemas import Token
-from app.security.security import create_access_token
-from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
-from app.database.session import get_db
+from src.api.handlers.login import authenticate_user
+from src.api.schemas.old_schemas import Token
+from src.security.security import create_access_token
+from config import ACCESS_TOKEN_EXPIRE_MINUTES
+from src.database.session import get_db
 
 login_router = APIRouter()
 

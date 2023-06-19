@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from app.api.handlers.user import _delete_user, _create_new_user, _get_user_by_id, _update_user, check_user_permissions
-from app.database.models import User
-from app.database.session import get_db
-from app.api.schemas.old_schemas import UserCreate, ShowUser, UpdatedUserResponse, UpdateUserRequest
+from src.api.handlers.user import _delete_user, _create_new_user, _get_user_by_id, _update_user, check_user_permissions
+from src.database.models import User
+from src.database.session import get_db
+from src.api.schemas.old_schemas import UserCreate, ShowUser, UpdatedUserResponse, UpdateUserRequest
 from uuid import UUID
 from fastapi import HTTPException
-from app.api.services.login import get_current_user_from_token
+from src.api.services.login import get_current_user_from_token
 from logging import getLogger
 
 user_router = APIRouter()

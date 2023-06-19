@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from app.api.handlers.news import delete_blog_info, post_news
-from app.database.session import get_db
+from src.api.handlers.news import delete_blog_info, post_news
+from src.database.session import get_db
 
 admin_router = APIRouter()
 

@@ -1,9 +1,9 @@
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database.methods.news import New
+from src.database.methods.news import New
 from uuid import UUID
 
-from app.database.models import News
+from src.database.models import News
 
 
 async def post_news(session: AsyncSession):

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, update, delete
-from app.database.models import User, PortalRole
+from src.database.models import User, PortalRole
 from typing import Union,List
 from uuid import UUID
 

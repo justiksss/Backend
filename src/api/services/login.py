@@ -2,12 +2,12 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from typing import Union
-from app.database.models import User
-from app.database.session import get_db
-from app.security.hashing import Hasher
-from app.database.methods.userdal import UserDAL
+from src.database.models import User
+from src.database.session import get_db
+from src.security.hashing import Hasher
+from src.database.methods.userdal import UserDAL
 from fastapi.security import OAuth2PasswordBearer
-from app.config import ALGORITM, SECRET_KEY
+from config import ALGORITM, SECRET_KEY
 from jose import JWTError, jwt
 
 

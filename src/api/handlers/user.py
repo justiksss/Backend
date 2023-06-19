@@ -1,10 +1,10 @@
 from typing import Union
-from app.api.schemas.old_schemas import UserCreate, ShowUser
-from app.database.methods.userdal import UserDAL
+from src.api.schemas.old_schemas import UserCreate, ShowUser
+from src.database.methods.userdal import UserDAL
 from uuid import UUID
 from fastapi import HTTPException
-from app.database.models import PortalRole, User
-from app.security.hashing import Hasher
+from src.database.models import PortalRole, User
+from src.security.hashing import Hasher
 
 
 async def _create_new_user(body: UserCreate, session) -> ShowUser:

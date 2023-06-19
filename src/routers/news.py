@@ -1,10 +1,8 @@
 from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api.handlers.news import get_post_info,get_page
+from src.api.handlers.news import get_post_info,get_page
 from fastapi.responses import FileResponse
-from sqlalchemy import select
-from app.database.models import News
-from app.database.session import get_db
+from src.database.session import get_db
 from uuid import UUID
 
 news_router = APIRouter()

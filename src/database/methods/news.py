@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database.models import News
+from src.database.models import News
 from crawlers.get_news import get_info
-from sqlalchemy import select, delete, func
+from sqlalchemy import select, delete
 from typing import Union,List
 from uuid import UUID
-from app.api.schemas.schemas_news import OneNews
+from src.api.schemas.schemas_news import OneNews
 from sqlalchemy.orm.attributes import instance_dict
 from datetime import datetime
 
