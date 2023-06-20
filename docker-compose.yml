@@ -3,9 +3,9 @@ services:
   db:
     image: postgres:15-alpine
     container_name: postgres
-    command: -p 1223
+    command: -p 1222
     expose:
-      - 1223
+      - 1222
     env_file:
       - .env
 
