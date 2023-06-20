@@ -11,6 +11,6 @@ RUN poetry install --no-dev
 COPY . .
 
 RUN chmod +x /fastapi_app/app.sh
-RUN alembic upgrade heads
+RUN alembic upgrade head
 CMD gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
 #CMD ["sh", "-c", "gunicorn -w 1 -b 0.0.0.0:8000 main:app"]

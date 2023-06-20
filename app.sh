@@ -1,7 +1,7 @@
 #!/bin/bash
 
-alembic revision --autogenerate
-alembic upgrade heads
+
+alembic upgrade head
 
 
 
