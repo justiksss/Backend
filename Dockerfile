@@ -9,7 +9,7 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev
 
 COPY . .
-RUN alembic revision --autogenerate
+
 RUN alembic upgrade heads
 RUN chmod +x /fastapi_app/app.sh
 CMD gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
