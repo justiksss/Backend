@@ -7,7 +7,7 @@ ENV PYTHONPATH=${PYTHONPATH}:${PWD}
 RUN pip3 install poetry
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev
-alembic revision --autogenerate
+RUN alembic revision --autogenerate
 RUN alembic upgrade heads
 COPY . .
 RUN chmod +x /fastapi_app/app.sh
