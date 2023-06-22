@@ -27,7 +27,7 @@ async def download_image(link: str) -> str:
     stream = BytesIO(response.content)
 
     image = Image.open(stream)
-    image.save(f"/Users/oleksiiyudin/Documents/Backend/images/images_for_blog/{name_image}.png", "PNG")
+    image.save(f"fastapi_app/images/images_for_blog/{name_image}.png", "PNG")
 
     return name_image
 
