@@ -15,7 +15,7 @@ RUN poetry config virtualenvs.create false \
 COPY . .
 
 # Run database migrations
-RUN poetry run alembic upgrade head
+
 RUN chmod +x /fastapi_app/app.sh
 
 CMD gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
