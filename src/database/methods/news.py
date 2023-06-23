@@ -16,13 +16,22 @@ class New:
 
         info = await get_info()
 
-        for _ in range(0,3):
+        for post in info:
+            news = News(
+                title=post["title"],
+                image_path=post["image_name"],
+                created_at=post["time"],
+                description=post["description"]
+            )
+            query = select(News).where(News.title == news.title)
+            result = await self.db_session.execute(query)
+            existing_news = result.scalar()
 
-            for post in info:
-                news = News(title=post["title"],image_path=post["image_name"],created_at=post["time"],description=post["description"])
-
+            if not existing_news:
                 self.db_session.add(news)
+
         await self.db_session.flush()
+        await self.db_session.commit()
 
         return "News uploaded"
 
@@ -46,10 +55,8 @@ class New:
         posts = []
         for i in query:
             post = instance_dict(i)
-            time = post['created_at'].replace("Published on ","")
-            datetime_format = "%d.%m.%Y %H:%M:%S"
-            datetime_obj = datetime.strptime(time,datetime_format)
-            news = OneNews(title=post["title"], sentence=post['description'].split(".")[0],id_news=post["id_news"],published_at=datetime_obj)
+
+            news = OneNews(title=post["title"], sentence=post['description'].split(".")[0],id_news=post["id_news"],published_at=post["created_at"])
             posts.append(news)
 
         return posts

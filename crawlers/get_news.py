@@ -1,6 +1,7 @@
 import asyncio
 import csv
 import pprint
+from datetime import datetime
 
 from PIL import Image
 import httpx
@@ -11,7 +12,7 @@ from typing import Union
 
 async def get_response(url: str) -> Union[httpx.Response,str]:
     try:
-        response: httpx.Response = httpx.get(url, timeout=15)
+        response: httpx.Response = httpx.get(url, timeout=300)
 
         return response
     except:
@@ -28,7 +29,7 @@ async def download_image(link: str) -> str:
     stream = BytesIO(response.content)
 
     image = Image.open(stream)
-    image.save(f"/Users/oleksiiyudin/Desktop/Backend/images/images_for_blog/{name_image}.png", "PNG")
+    image.save(f"/Users/oleksiiyudin/Desktop/Backend/images/{name_image}.png", "PNG")
 
     return name_image
 
@@ -38,20 +39,23 @@ async def info(link: str) -> list:
 
     data = BeautifulSoup(markup=html, features="lxml")
 
-    time = data.find(name="span", class_="created").text
+    time_info = data.find(name="span", class_="created").text
+    time = time_info.replace("Published on ", "")
+    datetime_format = "%d.%m.%Y %H:%M:%S"
+    datetime_obj = datetime.strptime(time, datetime_format)
     all_info = data.find(name="div", class_="content")
-    pag = [f"<p>{i.text}</p>" for i in all_info.find_all(name="div", class_="widget text")]
-    text = "".join(pag)
+    pag = [str(i.find_next(name="p")) for i in all_info.find_all(name="div", class_="widget text")]
 
-    info = [time, text]
+    text = "".join(pag)
+    info = [datetime_obj, text]
 
     return info
 
 
-async def get_info():
+async def get_info() -> list:
     posts = []
 
-    for i in range(0,2):
+    for i in range(0,5):
         url = f"https://www.expats.cz/czech-news/daily-news/{i}"
 
         data = BeautifulSoup(markup=await get_response(url=url), features="lxml")
@@ -66,7 +70,7 @@ async def get_info():
 
         """More info, time - is 0, 1 - description"""
         new = [i for i in zip(more_info,images_name,title_subtext_view)]
-        posts = []
+
         for post in new:
                 new_post = {
                     "time": post[0][0],
@@ -76,7 +80,7 @@ async def get_info():
                 }
                 posts.append(new_post)
 
-        return posts
+    return posts
 
 
 async def write_posts_to_csv(posts, csv_file_path):

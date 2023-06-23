@@ -2,7 +2,7 @@ import uuid
 from enum import Enum
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, Boolean, UUID, Integer,TEXT,Text
+from sqlalchemy import Column, String, Boolean, UUID, Text, DateTime
 
 Base = declarative_base()
 
@@ -45,8 +45,8 @@ class News(Base):
     __tablename__ = "news"
 
     id_news = Column(UUID(as_uuid=True),primary_key=True, default=uuid.uuid4)
-    title = Column(Text, nullable=False)
-    created_at = Column(Text, nullable=False)
+    title = Column(Text, nullable=False, unique=True)
+    created_at = Column(DateTime, nullable=False)
     description = Column(Text, nullable=False)
     image_path = Column(Text, nullable=False)
 

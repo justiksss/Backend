@@ -21,7 +21,7 @@ async def get_post_info(session: AsyncSession, id_news: UUID) -> dict:
         news_dal = New(session)
 
         news = await news_dal.get_news_by_id(id_news)
-        path_to_image = f"images/images_for_blog/{news.image_path}.png"
+        path_to_image = f"images/{news.image_path}.png"
 
         if news is not None:
             return {
