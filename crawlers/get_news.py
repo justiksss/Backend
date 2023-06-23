@@ -1,4 +1,5 @@
 import asyncio
+import csv
 import pprint
 
 from PIL import Image
@@ -27,24 +28,24 @@ async def download_image(link: str) -> str:
     stream = BytesIO(response.content)
 
     image = Image.open(stream)
-    image.save(f"images/images_for_blog/{name_image}.png", "PNG")
+    image.save(f"/Users/oleksiiyudin/Desktop/Backend/images/images_for_blog/{name_image}.png", "PNG")
 
     return name_image
 
 
-async def info(link: str) -> dict:
+async def info(link: str) -> list:
     html = await get_response(link)
 
     data = BeautifulSoup(markup=html, features="lxml")
 
     time = data.find(name="span", class_="created").text
-    all_info = data.find(name="div", class_="content").text.replace("\n","")
+    all_info = data.find(name="div", class_="content")
+    pag = [f"<p>{i.text}</p>" for i in all_info.find_all(name="div", class_="widget text")]
+    text = "".join(pag)
 
-    info = [time,all_info]
+    info = [time, text]
 
     return info
-
-
 
 
 async def get_info():
@@ -63,7 +64,7 @@ async def get_info():
         more_info = [await info("https://www.expats.cz" + i.find_next(name="a").get("href")) for i in image_block_and_link]
         images_name = [await download_image("https://www.expats.cz" + i.find_next(name="img").get("src")) for i in image_block_and_link]
 
-        """More info time - is 0, 1 - description"""
+        """More info, time - is 0, 1 - description"""
         new = [i for i in zip(more_info,images_name,title_subtext_view)]
         posts = []
         for post in new:
@@ -75,7 +76,23 @@ async def get_info():
                 }
                 posts.append(new_post)
 
-    return posts
+        return posts
 
+
+async def write_posts_to_csv(posts, csv_file_path):
+    fieldnames = ["time", "description", "image_name", "title"]
+
+
+    with open(csv_file_path, "w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+
+        writer.writeheader()
+
+        for post in posts:
+            writer.writerow(post)
+
+    print("Posts written to CSV successfully!")
+
+csv_file_path = "/Users/oleksiiyudin/Desktop/Backend/crawlers/data.csv"
 
 

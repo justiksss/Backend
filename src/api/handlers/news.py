@@ -38,12 +38,16 @@ async def delete_blog_info(session: AsyncSession):
         return "All deleted"
 
 
-async def get_page(session: AsyncSession, limit: int,offset: int):
+async def get_page(session: AsyncSession, page_size: int = 3, page: int = 1) -> dict:
     async with session.begin():
 
         news_dal = New(session)
 
-        selected = await news_dal.get_news_preview(limit=limit,offset=offset)
+        selected = await news_dal.get_news_preview(limit=page_size,offset=page)
         length = await session.scalar(select(func.count()).select_from(News))
-        selected.append({"Pages": length//limit })
-        return selected
+
+
+        return {
+            "total_pages": length // page_size,
+            "all_posts": selected
+        }

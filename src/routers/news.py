@@ -32,7 +32,7 @@ async def get_text_by_id_post(id_news: UUID, db:AsyncSession = Depends(get_db)):
 
 
 @news_router.get("/page")
-async def view_page(limit: int, offset: int, db: AsyncSession = Depends(get_db)):
-    posts = await get_page(limit=limit,offset=offset,session=db)
+async def view_page(page_size: int = 3, page: int = 1, db: AsyncSession = Depends(get_db)):
+    posts = await get_page(page_size=page_size,page=page,session=db)
 
     return posts
