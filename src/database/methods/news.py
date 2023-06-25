@@ -6,7 +6,6 @@ from typing import Union,List
 from uuid import UUID
 from src.api.schemas.schemas_news import OneNews
 from sqlalchemy.orm.attributes import instance_dict
-from datetime import datetime
 
 class New:
     def __init__(self ,db_session:AsyncSession):
@@ -51,15 +50,25 @@ class New:
         return res
 
     async def get_news_preview(self, limit: int, offset: int) -> List[OneNews]:
-        query = await self.db_session.scalars(select(News).limit(limit).offset(offset))
-        posts = []
-        for i in query:
-            post = instance_dict(i)
+        offset = (offset - 1) * limit + 1
+        selected = select(News).order_by(News.id_news).offset(offset).limit(limit)
+        result = await self.db_session.execute(selected)
+        posts = result.scalars().all()
 
-            news = OneNews(title=post["title"], sentence=post['description'].split(".")[0],id_news=post["id_news"],published_at=post["created_at"])
-            posts.append(news)
+        # Convert the result into a list of OneNews objects
+        news_list = []
+        for post in posts:
+            news = OneNews(
+                title=post.title,
+                sentence=post.description.split(".")[0],
+                id_news=post.id_news,
+                published_at=post.created_at
+            )
+            news_list.append(news)
 
-        return posts
+        return news_list
+
+
 
 
 

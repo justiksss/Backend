@@ -15,4 +15,5 @@ def create_access_token(data: dict , expires_delta: Optional[timedelta] = None):
         expire = datetime.utcnow() + timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({'exp':expire})
     encode_jwt = jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.ALGORITM)
+
     return encode_jwt

@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,HTTPException
+from fastapi import APIRouter,Depends,HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.handlers.news import get_post_info,get_page
 from fastapi.responses import FileResponse
@@ -32,7 +32,7 @@ async def get_text_by_id_post(id_news: UUID, db:AsyncSession = Depends(get_db)):
 
 
 @news_router.get("/page")
-async def view_page(page_size: int = 3, page: int = 1, db: AsyncSession = Depends(get_db)):
-    posts = await get_page(page_size=page_size,page=page,session=db)
+async def view_page(limit: int = Query(5, ge=1), offset: int = Query(0, ge=0), db: AsyncSession = Depends(get_db)):
+    posts = await get_page(page_size=limit,page=offset,session=db)
 
     return posts
