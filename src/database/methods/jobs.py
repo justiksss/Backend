@@ -35,14 +35,13 @@ class JobsDal:
     #     return "Jobs uploaded"
 
     async def get_job_by_uuid(self, uuid: UUID) -> Jobs:
+        query = select(Jobs).where(Jobs.id_job == uuid)
 
-            query = select(Jobs).where(Jobs.id_job == uuid)
+        selected = await self.db_session.execute(query)
+        row = selected.fetchone()
 
-            selected = await self.db_session.execute(query)
-            row = selected.fetchone()
-
-            if row is not None:
-                return row[0]
+        if row is not None:
+            return row[0]
 
     async def get_page(self, limit: int, offset: int) -> List[JobsView]:
 
