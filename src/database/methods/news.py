@@ -50,12 +50,11 @@ class New:
         return res
 
     async def get_news_preview(self, limit: int, offset: int) -> List[OneNews]:
-        offset = (offset - 1) * limit + 1
+        offset = offset * limit - limit
         selected = select(News).order_by(News.id_news).offset(offset).limit(limit)
         result = await self.db_session.execute(selected)
         posts = result.scalars().all()
 
-        # Convert the result into a list of OneNews objects
         news_list = []
         for post in posts:
             news = OneNews(
