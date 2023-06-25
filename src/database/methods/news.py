@@ -51,7 +51,7 @@ class New:
 
     async def get_news_preview(self, limit: int, offset: int) -> List[OneNews]:
         offset = offset * limit - limit
-        selected = select(News).order_by(News.id_news).offset(offset).limit(limit)
+        selected = select(News).order_by(News.id_news).limit(limit=limit).offset(offset=offset)
         result = await self.db_session.execute(selected)
         posts = result.scalars().all()
 
