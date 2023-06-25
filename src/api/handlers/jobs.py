@@ -6,15 +6,15 @@ from uuid import UUID
 from sqlalchemy import select,func
 from src.api.schemas.filters import Params
 from fastapi import Query
-async def upload_jobs(session: AsyncSession) -> str:
-
-    async with session.begin():
-
-        jobs_dal = JobsDal(session)
-
-        jobs_res = await jobs_dal.upload_jobs()
-
-        return jobs_res
+# async def upload_jobs(session: AsyncSession) -> str:
+#
+#     async with session.begin():
+#
+#         jobs_dal = JobsDal(session)
+#
+#         jobs_res = await jobs_dal.upload_jobs()
+#
+#         return jobs_res
 
 
 async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[Jobs, str]:

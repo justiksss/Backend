@@ -1,20 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from src.api.handlers.jobs import upload_jobs, get_one_job, get_jobs_view, main_search
+from src.api.handlers.jobs import get_one_job, get_jobs_view, main_search
 from src.database.session import get_db
 from sqlalchemy.exc import IntegrityError
 from src.api.schemas.filters import Params
 job_router = APIRouter()
 
 
-@job_router.post("/add_jobs")
-async def post_a_jobs(db: AsyncSession = Depends(get_db)):
-    """Run crawlers to add new jobs , (long task for 15-20 for full upload)"""
-    try:
-        return await upload_jobs(session=db)
-    except IntegrityError as err:
-        raise HTTPException(detail=f"{err}",status_code=503)
+# @job_router.post("/add_jobs")
+# async def post_a_jobs(db: AsyncSession = Depends(get_db)):
+#     """Run crawlers to add new jobs , (long task for 15-20 for full upload)"""
+#     try:
+#         return await upload_jobs(session=db)
+#     except IntegrityError as err:
+#         raise HTTPException(detail=f"{err}",status_code=503)
 
 
 @job_router.get("/get_job")

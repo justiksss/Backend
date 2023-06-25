@@ -13,26 +13,26 @@ class JobsDal:
     def __init__(self,db_session: AsyncSession):
         self.db_session = db_session
 
-    async def upload_jobs(self):
-        jobs = get_jobs()
-
-        for job in jobs:
-            if job["name"] and job["link"] and job["company_name"] is not None:
-                new_job = Jobs(
-                    link=job["link"],
-                    name=job["name"],
-                    company_name=job["company_name"],
-                    job_type=job["job_type"],
-                    location=job["location"],
-                    description=job["description"],
-                    logo=job['logo'],
-                    posted_days_ago = job["post_days_ago"]
-                    )
-                self.db_session.add(new_job)
-
-        await self.db_session.flush()
-
-        return "Jobs uploaded"
+    # async def upload_jobs(self):
+    #     jobs = get_jobs()
+    #
+    #     for job in jobs:
+    #         if job["name"] and job["link"] and job["company_name"] is not None:
+    #             new_job = Jobs(
+    #                 link=job["link"],
+    #                 name=job["name"],
+    #                 company_name=job["company_name"],
+    #                 job_type=job["job_type"],
+    #                 location=job["location"],
+    #                 description=job["description"],
+    #                 logo=job['logo'],
+    #                 posted_days_ago = job["post_days_ago"]
+    #                 )
+    #             self.db_session.add(new_job)
+    #
+    #     await self.db_session.flush()
+    #
+    #     return "Jobs uploaded"
 
     async def get_job_by_uuid(self, uuid: UUID) -> Jobs:
 
