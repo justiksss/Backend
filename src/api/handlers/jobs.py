@@ -58,8 +58,9 @@ async def main_search(session: AsyncSession, param: Params, limit: int, offset: 
         if param.days_ago_posted:
             query = query.where(Jobs.posted_days_ago <= param.days_ago_posted)
 
-        count_query = query.alias().count()
-        total_results = await session.scalar(count_query)
+        count_query = select(func.count()).select_from(query.alias()).scalar_subquery()
+
+        total_results = await session.execute(count_query)
 
         query = query.limit(limit).offset(offset)
         result = await session.execute(query)
