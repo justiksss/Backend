@@ -36,12 +36,24 @@ class JobsDal:
 
     async def get_job_by_uuid(self, uuid: UUID) -> Jobs:
         query = select(Jobs).where(Jobs.id_job == uuid)
-
         selected = await self.db_session.execute(query)
         row = selected.fetchone()
 
         if row is not None:
-            return row[0]
+            job_data = {
+                "company_name": row[0],
+                "link": row[1],
+                "location": row[2],
+                "logo": row[3],
+                "job_type": row[4],
+                "id_job": row[5],
+                "name": row[6],
+                "description": row[7],
+                "posted_days_ago": row[8]
+            }
+
+            job = Jobs(**job_data)
+            return job
 
     async def get_page(self, limit: int, offset: int) -> List[JobsView]:
 
