@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import instance_dict
 
-from crawlers.get_jobs import get_jobs
+
 from src.database.models import Jobs
 from uuid import UUID
 from sqlalchemy import select
