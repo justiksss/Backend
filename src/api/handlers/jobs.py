@@ -46,7 +46,7 @@ async def get_jobs_view(session: AsyncSession,limit: int, offset: int) -> Union[
         return {"pages": length // limit,"jobs":jobs_page}
 
 
-from sqlalchemy import select, func
+
 
 async def main_search(session: AsyncSession, param: Params, limit: int, offset: int) -> dict:
     async with session.begin():
@@ -60,7 +60,7 @@ async def main_search(session: AsyncSession, param: Params, limit: int, offset: 
         if param.days_ago_posted:
             query = query.where(Jobs.posted_days_ago <= param.days_ago_posted)
 
-        count_query = select(func.count()).select_from(query.alias()).as_scalar()
+        count_query = select(func.count()).select_from(query.alias()).scalar()
 
         total_results = await session.execute(count_query)
 
@@ -81,4 +81,5 @@ async def main_search(session: AsyncSession, param: Params, limit: int, offset: 
         pages = total_results // limit
 
         return {"pages": pages, "jobs": results}
+
 
