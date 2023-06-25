@@ -46,8 +46,7 @@ async def get_jobs_view(session: AsyncSession,limit: int, offset: int) -> Union[
         return {"pages": length // limit,"jobs":jobs_page}
 
 
-async def main_search(session: AsyncSession, param: Params) -> dict:
-
+async def main_search(session: AsyncSession, param: Params, limit: int, offset: int) -> dict:
     async with session.begin():
         query = select(Jobs)
         if param.keyword:
@@ -59,12 +58,14 @@ async def main_search(session: AsyncSession, param: Params) -> dict:
         if param.days_ago_posted:
             query = query.where(Jobs.posted_days_ago <= param.days_ago_posted)
 
+        count_query = query.alias().count()
+        total_results = await session.scalar(count_query)
+
+        query = query.limit(limit).offset(offset)
         result = await session.execute(query)
         jobs = result.scalars().all()
 
-
         results = []
-        pages = len(results) // 12
         for job in jobs:
             results.append({
                 'id': job.id_job,
@@ -74,4 +75,7 @@ async def main_search(session: AsyncSession, param: Params) -> dict:
                 'days_ago_posted': job.posted_days_ago
             })
 
-        return {"pages": pages,"jobs":results}
+        pages = total_results // limit
+
+        return {"pages": pages, "jobs": results}
+

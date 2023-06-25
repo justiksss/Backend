@@ -9,21 +9,6 @@ from typing import List
 from src.api.schemas.schemas_jobs import JobsView
 
 
-def job_to_dict(job):
-    job_dict = {
-        "company_name": job.company_name,
-        "link": job.link,
-        "location": job.location,
-        "logo": job.logo,
-        "job_type": job.job_type,
-        "id_job": job.id_job,
-        "name": job.name,
-        "description": job.description,
-        "posted_days_ago": job.posted_days_ago
-    }
-    return job_dict
-
-
 class JobsDal:
     def __init__(self,db_session: AsyncSession):
         self.db_session = db_session
@@ -49,14 +34,20 @@ class JobsDal:
     #
     #     return "Jobs uploaded"
 
-    async def get_job_by_uuid(self, uuid: UUID) -> dict:
+    async def get_job_by_uuid(self, uuid: UUID) -> Jobs:
         query = select(Jobs).where(Jobs.id_job == uuid)
+
         selected = await self.db_session.execute(query)
         row = selected.fetchone()
 
         if row is not None:
-            job_dict = job_to_dict(row[0])
-            return job_dict
+
+            jobs_extend = instance_dict(row)
+            job = Jobs(id_job=jobs_extend["id_job"], name=jobs_extend["name"], logo=jobs_extend["logo"],
+                           location="Prague", company_name=jobs_extend["company_name"],job_type=jobs_extend["job_type"],
+                       posted_days_ago=jobs_extend["posted_days_ago"],description=jobs_extend["description"])
+
+            return job
 
     async def get_page(self, limit: int, offset: int) -> List[JobsView]:
 
@@ -65,6 +56,7 @@ class JobsDal:
         for i in query:
             jobs_extend = instance_dict(i)
 
+            job = JobsView(id_job=jobs_extend["id_job"],name=jobs_extend["name"],logo=jobs_extend["logo"],location="Prague",company_name=jobs_extend["company_name"])
             posts.append(job)
 
         return posts
