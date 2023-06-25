@@ -31,8 +31,8 @@ async def get_page_jobs(limit: int = 12, offset: int = 0, db: AsyncSession = Dep
 
 
 @job_router.get("/filters")
-async def filters_search(params: Params = Depends(), db:AsyncSession = Depends(get_db)):
+async def filters_search(limit: int, offset: int, params: Params = Depends(), db:AsyncSession = Depends(get_db)):
     """Main search"""
-    jobs = await main_search(param=params,session=db)
+    jobs = await main_search(param=params,session=db,limit=limit,offset=offset)
 
     return jobs
