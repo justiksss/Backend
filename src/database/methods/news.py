@@ -51,7 +51,6 @@ class New:
 
     async def get_news_preview(self, page_size: int, page: int) -> List[OneNews]:
         offset = (page -1) * page_size
-        # limit = page * page_size
         selected = select(News).order_by(News.id_news).limit(limit=page_size).offset(offset=offset)
         result = await self.db_session.execute(selected)
         posts = result.scalars().all()
