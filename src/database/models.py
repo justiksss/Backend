@@ -17,7 +17,7 @@ class User(Base):
     __tablename__= "user"
 
     user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4())
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False,unique=True)
     surname = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     is_active = Column(Boolean, default=True)
@@ -57,7 +57,7 @@ class Jobs(Base):
 
     id_job = Column(UUID(as_uuid=True),primary_key=True, default=uuid.uuid4)
 
-    name = Column(Text, nullable=False)
+    name = Column(Text, nullable=False, unique=True)
     link = Column(String, nullable=False)
     company_name = Column(String, nullable=False, index=True)
     job_type = Column(String, nullable=False)

@@ -15,13 +15,12 @@
 #
 # chrome_options = Options()
 # chrome_options.add_experimental_option("detach", True)
-# chrome_options.add_argument("headless")
+# # chrome_options.add_argument("headless")
 # chrome_options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15")
 #
 # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 # driver.get("https://cz.indeed.com/jobs?q=&l=Praha%2C+Hlavn%C3%AD+m%C4%9Bsto+Praha&rbl=Praha&jlid=316ca9ce842785a8&fromage=14&lang=en&vjk=e1a02caeeabb8b7f")
 # driver.maximize_window()
-# url_template = "https://cz.indeed.com/jobs?q=&l=Praha%2C+Hlavn%C3%AD+m%C4%9Bsto+Praha&rbl=Praha&jlid=316ca9ce842785a8&fromage=14&lang=en&vjk=e1a02caeeabb8b7f"+"&start={offset}"
 #
 # def get_page_count(url):
 #     driver.get(url)
@@ -46,11 +45,11 @@
 #
 #     cards = driver.find_elements(by=By.CSS_SELECTOR, value=".jobsearch-ResultsList .cardOutline")
 #     links_to_click = driver.find_elements(by=By.CSS_SELECTOR, value=".jobsearch-ResultsList .cardOutline .resultContent")
+#     print(links_to_click)
 #     action = ActionChains(driver)
-#     for i in range(len(cards)):
-#         card = cards[i]
-#         link = links_to_click[i]
-#         action.move_to_element(card).click(link).perform()
+#     for i in links_to_click:
+#
+#         action.move_to_element(i).click(i).perform()
 #         WebDriverWait(driver, 10).until(
 #             EC.presence_of_element_located((By.CSS_SELECTOR, ".jobsearch-JobInfoHeader-title-container span"))
 #         )
@@ -94,15 +93,20 @@
 #             link = link_element[0].get_attribute("href")
 #             link_name = link_element[0].text
 #         try:
-#             job_type_list = ["Plný úvazek","Částečný úvazek","Trvalý","Praxe","Smlouva","Dočasný úvazek"]
-#
+#             job_translate = {
+#                 "Plný úvazek":"Full time",
+#                 "Částečný úvazek":"Part-time job",
+#                 "Trvalý":"Full time",
+#                 "Smlouva":"Contract",
+#                 "Dočasný úvazek":"Temporary work"
+#             }
 #             job_type_ele = driver.find_element(by=By.CSS_SELECTOR, value=".attribute_snippet").text
 #
-#             for i in job_type_list:
-#                 if job_type_ele in i:
-#                     job_type = i
-#                 else:
-#                     job_type = "No job type"
+#
+#             if job_type_ele.rstrip() in job_translate.keys():
+#                 job_type = job_translate[job_type_ele.rstrip()]
+#             else:
+#                 job_type = "No job type"
 #         except selenium.common.exceptions.NoSuchElementException:
 #             job_type = "No job type"
 #
@@ -127,22 +131,21 @@
 #             "logo": image,
 #             "post_days_ago": int(posted_days_ago)
 #         }
-#
+#         print(entity["link"],entity["job_type"],entity["name"],)
 #         return entity
 #
 #
 # def get_jobs():
-#     jobs = []
+#     url_template = "https://cz.indeed.com/jobs?q=&l=Praha%2C+Hlavn%C3%AD+m%C4%9Bsto+Praha&rbl=Praha&jlid=316ca9ce842785a8&fromage=14&lang=en&vjk=e1a02caeeabb8b7f" + "&start={offset}"
+#
 #     page_id = 0
-#
-#
 #     page_count = get_page_count(url_template.replace("{offset}", "0"))
-#     for k in range(30):
+#     for k in range(page_count):
 #         url = url_template.replace("{offset}", str(page_id))
-#         jobs.append(search_all(url))
+#         job = search_all(url)
 #         sleep(2)
 #         page_id += 10
 #         sleep(3)
-#     return jobs
+#
 #
 #

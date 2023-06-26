@@ -1,23 +1,26 @@
+import math
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Union
 from src.database.methods.jobs import JobsDal
 from src.database.models import Jobs
 from uuid import UUID
-from sqlalchemy import select,func
+from sqlalchemy import select,func, or_
 from src.api.schemas.filters import Params
-from fastapi import Query
+
+
 # async def upload_jobs(session: AsyncSession) -> str:
 #
-#     async with session.begin():
 #
-#         jobs_dal = JobsDal(session)
 #
-#         jobs_res = await jobs_dal.upload_jobs()
+#     jobs_dal = JobsDal(session)
 #
-#         return jobs_res
+#     jobs_res = await jobs_dal.upload_jobs()
+#
+#     return jobs_res
 
 
-async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[Jobs, str]:
+async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
 
     async with session.begin():
 
@@ -31,40 +34,65 @@ async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[Jobs, str]:
         return jobs_select
 
 
-async def get_jobs_view(session: AsyncSession,limit: int, offset: int) -> Union[dict, str]:
 
+
+
+
+async def main_search(page, per_page, params: Params, session: AsyncSession):
+    # Convert company_name and keyword to lowercase for case-insensitive search
+    if params.company_name is not None:
+        company_name = params.company_name.lower()
+    else:
+        company_name = None
+
+    if params.keyword is not None:
+        keyword = params.keyword.lower()
+    else:
+        keyword = None
+
+    if params.job_type is not None:
+        job_type = params.job_type.lower()
+    else:
+        job_type = None
+
+    # Create an asynchronous session
     async with session.begin():
-        jobs_dal = JobsDal(db_session=session)
-
-        jobs_page = await jobs_dal.get_page(limit=limit,offset=offset)
-
-        length = await session.scalar(select(func.count()).select_from(Jobs))
-
-        if jobs_page is None:
-            return "Jobs not found"
-
-        return {"pages": length // limit,"jobs":jobs_page}
-
-
-
-async def main_search(session: AsyncSession, param: Params, limit: int = 5, offset: int = 1) -> dict:
-    async with session.begin():
+        # Create a base query
         query = select(Jobs)
-        if param.keyword:
-            query = query.where(Jobs.name.ilike(f'%{param.keyword}%'))
-        if param.job_type:
-            query = query.where(Jobs.job_type == param.job_type)
-        if param.company_name:
-            query = query.where(Jobs.company_name.ilike(f'%{param.company_name}%'))
-        if param.days_ago_posted:
-            query = query.where(Jobs.posted_days_ago <= param.days_ago_posted)
 
-        count_query = select(func.count()).select_from(query.alias())
+        if params.days_ago_posted is not None:
+            # Calculate the date 'days_ago_posted' days ago from the current date
+            query = query.where(Jobs.posted_days_ago >= params.days_ago_posted)
 
-        total_results = await session.execute(count_query)
-        total_count = total_results.scalar_one()
+        if company_name:
+            query = query.where(func.lower(Jobs.company_name).like(f'%{company_name}%'))
 
-        query = query.limit(limit).offset(offset)
+        if keyword:
+            query = query.where(
+                or_(
+                    func.lower(Jobs.company_name).like(f'%{keyword}%'),
+                    func.lower(Jobs.description).like(f'%{keyword}%')
+                )
+            )
+
+        if job_type:
+            query = query.where(func.lower(Jobs.job_type).like(f'%{job_type}%'))
+
+        # Execute the query
+        result = await session.execute(query)
+
+        # Fetch the jobs
+        jobs = result.scalars().all()
+
+        # Calculate total count after filters
+        count_query = select(func.count()).select_from(query.alias("subquery"))
+        total_count = await session.scalar(count_query)
+
+        # Calculate total pages
+        total_pages = math.ceil(total_count / per_page)
+
+        # Apply pagination
+        query = query.limit(per_page).offset((page - 1) * per_page)
         result = await session.execute(query)
         jobs = result.scalars().all()
 
@@ -78,9 +106,14 @@ async def main_search(session: AsyncSession, param: Params, limit: int = 5, offs
                 'days_ago_posted': job.posted_days_ago
             })
 
-        pages = total_count // limit
+        return {"total_pages": total_pages, "total_count": total_count, "jobs": results}
 
-        return {"pages": pages, "jobs": results}
+
+async def get_all_companies(db: AsyncSession) -> list:
+    async with db.begin():
+        companies = await db.execute(select(Jobs.company_name).distinct())
+        companies = [company for company in companies.scalars().all()]
+        return companies
 
 
 
