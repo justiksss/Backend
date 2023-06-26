@@ -6,3 +6,4 @@ class Params(BaseModel):
     job_type: Optional[str] = None
     company_name: Optional[str] = None
     days_ago_posted: Optional[int] = None
+    sort_by: Optional[str] = None

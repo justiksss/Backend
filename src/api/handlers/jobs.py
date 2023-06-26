@@ -1,11 +1,11 @@
 import math
-
+from sqlalchemy.sql.expression import desc, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Union
 from src.database.methods.jobs import JobsDal
 from src.database.models import Jobs
 from uuid import UUID
-from sqlalchemy import select,func, or_
+from sqlalchemy import select,func, or_, and_
 from src.api.schemas.filters import Params
 
 
@@ -46,7 +46,7 @@ async def main_search(page, per_page, params: Params, session: AsyncSession):
         company_name = None
 
     if params.keyword is not None:
-        keyword = params.keyword.lower()
+        keyword = params.keyword.lower().replace(' ', '+')
     else:
         keyword = None
 
@@ -68,15 +68,30 @@ async def main_search(page, per_page, params: Params, session: AsyncSession):
             query = query.where(func.lower(Jobs.company_name).like(f'%{company_name}%'))
 
         if keyword:
-            query = query.where(
+            # Split the keyword into separate words
+            keyword_words = keyword.split('+')
+
+            # Create a list of OR conditions for each keyword word
+            keyword_conditions = [
                 or_(
-                    func.lower(Jobs.company_name).like(f'%{keyword}%'),
-                    func.lower(Jobs.description).like(f'%{keyword}%')
+                    func.lower(Jobs.company_name).like(f'%{word}%'),
+                    func.lower(Jobs.description).like(f'%{word}%')
                 )
-            )
+                for word in keyword_words
+            ]
+
+            # Combine the OR conditions with an AND condition
+            query = query.where(and_(*keyword_conditions))
 
         if job_type:
             query = query.where(func.lower(Jobs.job_type).like(f'%{job_type}%'))
+
+        if params.sort_by == 'New jobs':
+            query = query.order_by(asc(Jobs.posted_days_ago))
+        elif params.sort_by == 'Name descending':
+            query = query.order_by(desc(Jobs.name))
+        elif params.sort_by == 'Name ascending':
+            query = query.order_by(asc(Jobs.name))
 
         # Execute the query
         result = await session.execute(query)
@@ -103,10 +118,12 @@ async def main_search(page, per_page, params: Params, session: AsyncSession):
                 'keyword': job.name,
                 'job_type': job.job_type,
                 'company_name': job.company_name,
-                'days_ago_posted': job.posted_days_ago
+                'days_ago_posted': job.posted_days_ago,
+                "image": job.logo
             })
 
         return {"total_pages": total_pages, "total_count": total_count, "jobs": results}
+
 
 
 async def get_all_companies(db: AsyncSession) -> list:
