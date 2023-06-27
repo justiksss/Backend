@@ -63,7 +63,7 @@ class JobsDal:
 
 
 
-        return "Jobs uploaded"
+
     async def get_job_by_uuid(self, uuid: UUID) -> dict:
         query = select(Jobs).where(Jobs.id_job == uuid)
 
@@ -74,7 +74,7 @@ class JobsDal:
             job = row[0]  # Access the Jobs object from the tuple
 
             job_dict = {
-                "id_job": str(job.id_job),
+                "id_job": job.id_job,
                 "name": job.name,
                 "link": job.link,
                 "company_name": job.company_name,

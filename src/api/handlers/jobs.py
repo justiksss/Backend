@@ -21,17 +21,17 @@ from src.api.schemas.filters import Params
 
 
 async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
-
     async with session.begin():
-
-        jobs_dal = JobsDal(session)
+        jobs_dal = JobsDal(db_session=session)
 
         jobs_select = await jobs_dal.get_job_by_uuid(uuid=uuid)
 
         if jobs_select is None:
+
             return f"Job with {uuid} not found"
 
         return jobs_select
+
 
 
 
