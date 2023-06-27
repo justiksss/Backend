@@ -62,7 +62,7 @@ async def main_search(page, per_page, params: Params, session: AsyncSession):
 
         if params.days_ago_posted is not None:
             # Calculate the date 'days_ago_posted' days ago from the current date
-            query = query.where(Jobs.posted_days_ago >= params.days_ago_posted)
+            query = query.where(Jobs.posted_days_ago <= params.days_ago_posted)
 
         if company_name:
             query = query.where(func.lower(Jobs.company_name).like(f'%{company_name}%'))
