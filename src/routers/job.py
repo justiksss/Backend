@@ -25,8 +25,9 @@ async def get_job(uuid: UUID, db: AsyncSession = Depends(get_db)):
 
 
 
-@job_router.get("/filters")
-async def filters_search(limit: int = 12, page: int = 1, params: Params = Depends(), db:AsyncSession = Depends(get_db)):
+@job_router.post("/search")
+async def search_jobs(params: Params, session: AsyncSession = Depends(get_db)):
+
     """Main search, with params:\n
     days ago params - insert int and get all jobs with less then your integer \n
     job-type -  can be : job_translate = {
@@ -47,7 +48,7 @@ async def filters_search(limit: int = 12, page: int = 1, params: Params = Depend
     Name descending -> first letter Z
     New jobs -> start from posted days ago 1
     """
-    jobs = await main_search(params=params,session=db,per_page=limit,page=page)
+    jobs = await main_search(params=params,session=session)
 
     return jobs
 

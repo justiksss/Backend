@@ -1,9 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional,List
 
+
 class Params(BaseModel):
-    keyword: Optional[str] = None
-    job_type: Optional[str] = None
-    company_name: Optional[str] = None
-    days_ago_posted: Optional[int] = None
-    sort_by: Optional[str] = None
+    per_page: int = 12
+    page: int = 1
+    keyword: str = ''
+    job_type: str = ''
+    company_name: str = ''
+    days_ago_posted: str = ''
+    sort_by: str = ''

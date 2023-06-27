@@ -1,4 +1,6 @@
 import math
+from fastapi import HTTPException
+from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.expression import desc, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Union
@@ -33,36 +35,21 @@ async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
         return jobs_select
 
 
-
-
-
-
-
-async def main_search(page, per_page, params: Params, session: AsyncSession):
+async def main_search(params: Params, session: AsyncSession):
     # Convert company_name and keyword to lowercase for case-insensitive search
-    if params.company_name is not None:
-        company_name = params.company_name.lower()
-    else:
-        company_name = None
+    company_name = params.company_name.lower() if params.company_name != "string" else None
 
-    if params.keyword is not None:
-        keyword = params.keyword.lower().replace(' ', '+')
-    else:
-        keyword = None
+    keyword = params.keyword.lower().replace(' ', '+') if params.keyword != "string" else None
 
-    if params.job_type is not None:
-        job_type = params.job_type.lower()
-    else:
-        job_type = None
+    job_type = params.job_type.lower() if params.job_type != "string" else None
 
     # Create an asynchronous session
     async with session.begin():
         # Create a base query
         query = select(Jobs)
 
-        if params.days_ago_posted is not None:
-            # Calculate the date 'days_ago_posted' days ago from the current date
-            query = query.where(Jobs.posted_days_ago <= params.days_ago_posted)
+        if params.days_ago_posted is not None and params.days_ago_posted != '':
+            query = query.where(Jobs.posted_days_ago <= int(params.days_ago_posted))
 
         if company_name:
             query = query.where(func.lower(Jobs.company_name).like(f'%{company_name}%'))
@@ -104,10 +91,10 @@ async def main_search(page, per_page, params: Params, session: AsyncSession):
         total_count = await session.scalar(count_query)
 
         # Calculate total pages
-        total_pages = math.ceil(total_count / per_page)
+        total_pages = math.ceil(total_count / params.per_page)
 
         # Apply pagination
-        query = query.limit(per_page).offset((page - 1) * per_page)
+        query = query.limit(params.per_page).offset((params.page - 1) * params.per_page)
         result = await session.execute(query)
         jobs = result.scalars().all()
 
@@ -123,8 +110,6 @@ async def main_search(page, per_page, params: Params, session: AsyncSession):
             })
 
         return {"total_pages": total_pages, "total_count": total_count, "jobs": results}
-
-
 
 async def get_all_companies(db: AsyncSession) -> list:
     async with db.begin():
