@@ -80,7 +80,7 @@ async def add_job_after_pay(body: Job,db: AsyncSession = Depends(get_db)):
     return new_job_response
 
 
-@job_router.post("/image/logo")
+@job_router.post("/image/{logo}")
 async def upload_image(file: UploadFile = File(None)):
     """Takes image in png format and add to dir with images.\n
     if send None , logo will be by default:https://cdn-icons-png.flaticon.com/512/306/306424.png \n
@@ -98,7 +98,7 @@ async def upload_image(file: UploadFile = File(None)):
             shutil.copyfileobj(file.file, f)
 
         return {"message": 200,
-                "name": f"http://127.0.0.1:8000/job/get_image/{file.filename}"
+                "name": f"https://teste-cmg2.onrender.com/get_image/{file.filename}"
                 }
 
 @job_router.get("/get_image/{file_name}")
