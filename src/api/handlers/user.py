@@ -2,10 +2,9 @@ from typing import Union
 from src.api.schemas.old_schemas import UserCreate, ShowUser
 from src.database.methods.userdal import UserDAL
 from uuid import UUID
-from fastapi import HTTPException
-from src.database.models import PortalRole, User
+from src.database.models import User
 from src.security.hashing import Hasher
-
+from sqlalchemy.ext.asyncio import AsyncSession
 
 async def _create_new_user(body: UserCreate, session) -> ShowUser:
     async with session.begin():
@@ -17,7 +16,7 @@ async def _create_new_user(body: UserCreate, session) -> ShowUser:
             surname=body.surname,
             email=body.email,
             hashed_password=Hasher.get_password_hash(body.password),
-            roles=[PortalRole.ROLE_PORTAL_USER]
+            roles="Default user"
         )
         return ShowUser(
             user_id = user.user_id,
@@ -27,7 +26,7 @@ async def _create_new_user(body: UserCreate, session) -> ShowUser:
             is_active=user.is_active
         )
 
-async def _delete_user(user_id, session) -> Union[UUID, None]:
+async def _delete_user(user_id, session) -> Union[str, None]:
     async with session.begin():
 
         user_dal = UserDAL(session)
@@ -53,30 +52,11 @@ async def _update_user(updated_user_params: dict, user_id: UUID, session) -> Uni
         return updated_user_id
 
 
-def check_user_permissions(target_user: User, current_user: User) -> bool:
-    if PortalRole.ROLE_PORTAL_SUPERADMIN in current_user.roles:
-        raise HTTPException(
-            status_code=406, detail="Superadmin cannot be deleted via API."
-        )
-    if target_user.user_id != current_user.user_id:
-        # check admin role
-        if not {
-            PortalRole.ROLE_PORTAL_ADMIN,
-            PortalRole.ROLE_PORTAL_SUPERADMIN,
-        }.intersection(current_user.roles):
-            return False
-        # check admin deactivate superadmin attempt
-        if (
-            PortalRole.ROLE_PORTAL_SUPERADMIN in target_user.roles
-            and PortalRole.ROLE_PORTAL_ADMIN in current_user.roles
-        ):
-            return False
-        # check admin deactivate admin attempt
-        if (
-            PortalRole.ROLE_PORTAL_ADMIN in target_user.roles
-            and PortalRole.ROLE_PORTAL_ADMIN in current_user.roles
-        ):
-            return False
-    return True
+async def change_user_role(uuid: UUID, new_role: str, session:AsyncSession) -> User:
+    async with session.begin():
 
+        user_dal = UserDAL(session)
 
+        new_user_role = await user_dal.change_user_role(uuid=uuid,new_role=new_role)
+
+        return new_user_role

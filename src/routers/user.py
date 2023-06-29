@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from src.api.handlers.user import _delete_user, _create_new_user, _get_user_by_id, _update_user, check_user_permissions
+from src.api.handlers.user import _delete_user, _create_new_user, _get_user_by_id, _update_user, change_user_role
 from src.database.models import User
 from src.database.session import get_db
 from src.api.schemas.old_schemas import UserCreate, ShowUser, UpdatedUserResponse, UpdateUserRequest
@@ -9,7 +9,6 @@ from uuid import UUID
 from fastapi import HTTPException
 from src.api.services.login import get_current_user_from_token
 from logging import getLogger
-
 user_router = APIRouter()
 logger = getLogger(__name__)
 
@@ -32,9 +31,7 @@ async def update_user_by_id(
         raise HTTPException(
             status_code=404, detail=f"User with id {user_id} not found."
         )
-    if user_id != current_user.user_id:
-        if check_user_permissions(target_user=user_for_update, current_user=current_user):
-            raise HTTPException(status_code=403, detail="Forbidden.")
+
     try:
         updated_user_id = await _update_user(
             updated_user_params=updated_user_params, session=db, user_id=user_id
@@ -62,8 +59,7 @@ async def delete_user(user_id, db: AsyncSession = Depends(get_db),current_user: 
         raise HTTPException(
             status_code=404, detail=f"User with id {user_id} not found."
         )
-    if not check_user_permissions(target_user=user_for_deletion,current_user=current_user,):
-        raise HTTPException(status_code=403, detail="Forbidden.")
+
     deleted_user_id = await _delete_user(user_id, db)
     if deleted_user_id is None:
         raise HTTPException(
@@ -79,3 +75,30 @@ async def get_user_by_id(user_id: UUID, db: AsyncSession = Depends(get_db), curr
     if user is None:
         raise HTTPException(status_code=404,detail=f"User with id {user_id} not found")
     return user
+
+@user_router.patch("/change_role")
+async def change_user_role_by_uuid(user_id: UUID, new_role: str, db:AsyncSession = Depends(get_db)):
+    """Can be ("Default_user","Subscriber_TIER_1","Subscriber_TIER_2","Subscriber_TIER_3") \n
+    response changed_role : user email
+
+    """
+    user_role_list = ("Default_user","Subscriber_TIER_1","Subscriber_TIER_2","Subscriber_TIER_3")
+    if new_role not in user_role_list:
+        raise HTTPException(status_code=404, detail=f"Not found role:{new_role}")
+
+    changed_role = await change_user_role(uuid=user_id,session=db,new_role=new_role)
+
+    if changed_role is None:
+        raise HTTPException(status_code=404, detail=f"User with this id {user_id} not found")
+
+    return changed_role
+
+
+@user_router.get("/check_permission")
+async def check_user_permission(db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token)):
+    user_role_list = ("Subscriber_TIER_1", "Subscriber_TIER_2", "Subscriber_TIER_3")
+    if current_user.roles not in user_role_list:
+        raise HTTPException(status_code=403, detail="User is not a subscriber")
+    else:
+        return f"User with {current_user.user_id} id is a subscriber"

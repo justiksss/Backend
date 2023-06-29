@@ -1,6 +1,4 @@
 import math
-from fastapi import HTTPException
-from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.expression import desc, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Union
@@ -9,17 +7,7 @@ from src.database.models import Jobs
 from uuid import UUID
 from sqlalchemy import select,func, or_, and_
 from src.api.schemas.filters import Params
-
-
-# async def upload_jobs(session: AsyncSession) -> str:
-#
-#
-#
-#     jobs_dal = JobsDal(session)
-#
-#     jobs_res = await jobs_dal.upload_jobs()
-#
-#     return jobs_res
+from src.api.schemas.schemas_jobs import Job,Jobs_AddView
 
 
 async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
@@ -118,4 +106,49 @@ async def get_all_companies(db: AsyncSession) -> list:
         return companies
 
 
+async def add_job(session: AsyncSession, job: Job):
 
+    description: str ="<ul>" +"".join([f"<li>{i}</li>" for i in [job.salary
+                                                                      ,job.contact_email
+                                                                      ,job.twitter
+                                                                      ,job.video,job.remote_position] if i is not None]) + "</ul>" + job.description
+    job_template: Jobs = Jobs(
+        name=job.title,
+        link=job.link_for_contact,
+        job_type=job.job_type,
+        location=job.location,
+        description=description,
+        company_name=job.company_name,
+        logo=job.logo
+
+    )
+    async with session.begin():
+
+        job_dal = JobsDal(db_session=session)
+
+        new_job = await job_dal.add_job_after_payment(job=job_template)
+
+        return Jobs_AddView(
+            id_job=new_job.id_job,
+            name=new_job.name
+        )
+
+async def get_image_by_uuid(session: AsyncSession, id_news: UUID) -> dict:
+    async with session.begin():
+        news_dal = JobsDal(session)
+
+        jobs = await news_dal.get_job_by_uuid(id_news)
+        path = jobs.get("logo")
+        path_to_image = f"/Users/oleksiiyudin/Desktop/Backend/images/images_for_job/{path}"
+        if jobs is not None:
+            return {
+                "image":path_to_image
+                }
+
+async def get_image_by_name(filename:str) -> dict:
+
+    path_to_image = f"/Users/oleksiiyudin/Desktop/Backend/images/images_for_job/{filename}"
+
+    return {
+        "image": path_to_image
+    }
