@@ -101,7 +101,7 @@ async def upload_image(file: UploadFile = File(None)):
                 "name": f"https://teste-cmg2.onrender.com/get_image/{file.filename}"
                 }
 
-@job_router.get("/get_image/{file_name}")
+@job_router.get("/get_image")
 async def get_image(file_name: str):
     """Takes file name and if image with this name exist return a link with image \n
     if not raise http exceptions"""
