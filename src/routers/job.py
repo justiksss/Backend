@@ -98,7 +98,7 @@ async def upload_image(file: UploadFile = File(None)):
             shutil.copyfileobj(file.file, f)
 
         return {"message": 200,
-                "name": f"https://teste-cmg2.onrender.com/get_image/{file.filename}"
+                "name": f"https://teste-cmg2.onrender.com/job/get_image?file_name={file.filename}"
                 }
 
 @job_router.get("/get_image")
