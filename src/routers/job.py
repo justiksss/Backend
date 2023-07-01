@@ -80,7 +80,7 @@ async def add_job_after_pay(body: Job,db: AsyncSession = Depends(get_db)):
     return new_job_response
 
 
-@job_router.post("/image/{logo}")
+@job_router.post("/image")
 async def upload_image(file: UploadFile = File(None)):
     """Takes image in png format and add to dir with images.\n
     if send None , logo will be by default:https://cdn-icons-png.flaticon.com/512/306/306424.png \n
