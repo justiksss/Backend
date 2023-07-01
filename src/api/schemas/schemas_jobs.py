@@ -14,7 +14,7 @@ class Job(BaseModel):
     remote_position: Optional[str] = None
     salary: Optional[int] = None
     contact_email: Optional[str] = None
-    video: Optional[HttpUrl] = None
+    video: Optional[str] = None
     twitter: Optional[str] = None
     logo: str
 
