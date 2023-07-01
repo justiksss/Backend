@@ -9,6 +9,8 @@ from uuid import UUID
 from fastapi import HTTPException
 from src.api.services.login import get_current_user_from_token
 from logging import getLogger
+from pydantic import EmailStr
+from src.api.handlers.login import authenticate_user
 user_router = APIRouter()
 logger = getLogger(__name__)
 
@@ -102,3 +104,15 @@ async def check_user_permission(db: AsyncSession = Depends(get_db),
         raise HTTPException(status_code=403, detail="User is not a subscriber")
     else:
         return f"User with {current_user.user_id} id is a subscriber"
+
+@user_router.get("/check_user")
+async def check_user(email:EmailStr, password:str,db: AsyncSession = Depends(get_db)) -> dict:
+    user = await authenticate_user(email, password, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+
+    return {
+        "email": user.email,
+        "id": user.user_id
+    }
+
