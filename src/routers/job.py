@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from src.api.handlers.jobs import get_one_job, main_search,get_all_companies,add_job
+from src.api.handlers.jobs import get_one_job, main_search,get_all_companies,add_job,set_active_job
 from src.database.session import get_db
 from src.api.schemas.filters import Params
 from src.api.schemas.schemas_jobs import Job
@@ -113,6 +113,16 @@ async def get_image(file_name: str):
         return {"error": "PNG file not found"}
 
 
+@job_router.post("/is_active")
+async def set_active(uuid: UUID,db: AsyncSession = Depends(get_db)) -> str:
+
+    res = await set_active_job(uuid=uuid,session=db)
+
+    if not None:
+        return f"Job with {res} uuid is active"
+
+    else:
+        return "Job not found"
 
 
 

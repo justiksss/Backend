@@ -26,15 +26,13 @@ async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
 async def main_search(params: Params, session: AsyncSession):
     # Convert company_name and keyword to lowercase for case-insensitive search
     company_name = params.company_name.lower() if params.company_name != "string" else None
-
     keyword = params.keyword.lower().replace(' ', '+') if params.keyword != "string" else None
-
     job_type = params.job_type.lower() if params.job_type != "string" else None
 
     # Create an asynchronous session
     async with session.begin():
         # Create a base query
-        query = select(Jobs)
+        query = select(Jobs).where(Jobs.is_active == True)  # Add the condition here
 
         if params.days_ago_posted is not None and params.days_ago_posted != '':
             query = query.where(Jobs.posted_days_ago <= int(params.days_ago_posted))
@@ -152,3 +150,29 @@ async def get_image_by_name(filename:str) -> dict:
     return {
         "image": path_to_image
     }
+
+
+async def set_active_job(uuid: UUID, session: AsyncSession) -> Union[UUID,None]:
+    async with session.begin():
+        # Select the job with the specified UUID
+        job = select(Jobs).where(Jobs.id_job == uuid)
+
+        # Execute the select query
+        result = await session.execute(job)
+
+        # Retrieve the job
+        job = result.scalar()
+
+        if job is not None:
+            # Update the is_active field
+            job.is_active = True
+
+            # Commit the changes
+            await session.commit()
+
+            return uuid
+        else:
+            return None
+
+
+
