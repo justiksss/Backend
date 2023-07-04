@@ -1,7 +1,5 @@
 from dotenv import load_dotenv
-from functools import lru_cache
 
-from pydantic import BaseSettings
 import os
 
 load_dotenv()
@@ -18,18 +16,5 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 db_url = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-
-class Config(BaseSettings):
-    API_HOST: str = "127.0.0.1"
-    API_PORT: int = 8000
-    API_DEBUG: bool = False
-
-    DB_URL: str
-    REDIS_CACHE_URL: str
-
-    SQLA_ECHO_MODE: bool = True
-
-    class Config:
-        env_file = ".env"
 
 
