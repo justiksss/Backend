@@ -6,14 +6,7 @@ from uuid import UUID
 from src.database.models import News
 
 
-async def post_news(session: AsyncSession):
-    async with session.begin():
 
-        news_dal = New(session)
-
-        news = await news_dal.add_news()
-
-        return news
 
 
 async def get_post_info(session: AsyncSession, id_news: UUID) -> dict:

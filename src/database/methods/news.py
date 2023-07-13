@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.models import News
-from crawlers.get_news import get_info
 from sqlalchemy import select, delete
 from typing import Union,List
 from uuid import UUID
@@ -9,42 +8,6 @@ from asyncpg.exceptions import UniqueViolationError
 class New:
     def __init__(self ,db_session:AsyncSession):
         self.db_session = db_session
-
-    async def add_news(self):
-        info = await get_info()
-
-        added_titles = set()
-
-        for post in info:
-            title = post["title"]
-
-            # Skip if the title has already been added
-            if title in added_titles:
-                continue
-
-            news = News(
-                title=title,
-                image_path=post["image_name"],
-                created_at=post["time"],
-                description=post["description"]
-            )
-            query = select(News).where(News.title == news.title)
-            result = await self.db_session.execute(query)
-            existing_news = result.scalar()
-
-            if not existing_news:
-                try:
-                    self.db_session.add(news)
-                    await self.db_session.flush()
-                except UniqueViolationError:
-                    # Skip duplicate news entry and continue with the loop
-                    continue
-
-            added_titles.add(title)  # Add the title to the set of added titles
-
-        await self.db_session.commit()
-
-        return "News uploaded"
 
     async def get_news_by_id(self,id_news: UUID) -> Union[News,str]:
         query = select(News).where(News.id_news == id_news)
