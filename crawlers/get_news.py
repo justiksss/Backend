@@ -119,7 +119,7 @@ async def add_to_database(post):
 
 
 
-asyncio.run(get_info())
+
 
 
 
