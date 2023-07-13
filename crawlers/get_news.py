@@ -58,7 +58,7 @@ async def info(link: str) -> list:
 
 async def get_info() -> list:
     title_duplicate = []
-    for i in range(0,15):
+    for i in range(0,5):
         url = f"https://www.expats.cz/czech-news/daily-news/{i}"
 
         data = BeautifulSoup(markup=await get_response(url=url), features="lxml")
