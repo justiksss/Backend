@@ -1,12 +1,16 @@
-
+import asyncio
+import pprint
 from datetime import datetime
-
+from src.database.models import News
 from PIL import Image
 import httpx
 from io import BytesIO
 from bs4 import BeautifulSoup
 from typing import Union
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 
 
 
@@ -46,14 +50,14 @@ async def info(link: str) -> list:
     pag = [str(i.find_next(name="p")) for i in all_info.find_all(name="div", class_="widget text")]
     title = data.find(name="div",class_='title').text
     text = "".join(pag)
-    info = [datetime_obj, text,{"title":title.split("\n")[1]}]
+    title = title.split("\n")[1]
+    info = [datetime_obj, text,title]
 
     return info
 
 
 async def get_info() -> list:
-    posts = []
-
+    title_duplicate = []
     for i in range(0,15):
         url = f"https://www.expats.cz/czech-news/daily-news/{i}"
 
@@ -71,17 +75,52 @@ async def get_info() -> list:
         new = [i for i in zip(more_info,images_name,title_subtext_view)]
 
         for post in new:
-                new_post = {
-                    "time": post[0][0],
-                    "description":post[0][1],
-                    "image_name": post[1],
-                    "title": title["title"]
-                }
-                print(new_post["time"])
-                if new_post not in posts:
-                    posts.append(new_post)
 
-    return posts
+
+
+
+            news = News(
+                title=post[0][-1],
+                image_path=post[1],
+                created_at=post[0][0],
+                description=post[0][1]
+            )
+
+            await add_to_database(news)
+
+
+
+
+async def add_to_database(post):
+    DATABASE_URL = "postgresql+asyncpg://justiksss:HLGKrXbGHS7RFI2xv6aKmN9LbEl7tnPb@dpg-ci80c1enqql0ldenbru0-a.oregon-postgres.render.com/jobs_vgx8"
+
+    engine = create_async_engine(
+        DATABASE_URL,
+        future=True,
+        echo=True,
+        execution_options={"isolation_level": "AUTOCOMMIT"},
+    )
+
+    async_session = sessionmaker(
+        engine, expire_on_commit=False, class_=AsyncSession, autoflush=False
+    )
+
+    async with async_session() as session:
+        async with session.begin():
+            query = select(News).where(News.title == post.title)
+            result = await session.execute(query)
+            existing_news = result.scalar()
+
+            if not existing_news:
+                session.add(post)
+                await session.flush()
+            else:
+                print("News post already exists:", post.title)
+
+
+
+asyncio.run(get_info())
+
 
 
 
