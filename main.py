@@ -19,7 +19,8 @@ app.include_router(job_router, prefix="/job", tags=['job'])
 
 origins = [
     "http://localhost:3000",
-    "https://prague-job.vercel.app"
+    "https://prague-job.vercel.app",
+    "https://jobs.praguemorning.cz"
 ]
 
 app.add_middleware(
