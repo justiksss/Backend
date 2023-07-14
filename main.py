@@ -19,7 +19,7 @@ app.include_router(job_router, prefix="/job", tags=['job'])
 
 origins = [
     "http://localhost:3000",
-    "https://next-job-nine.vercel.app"
+    "https://prague-job.vercel.app/"
 ]
 
 app.add_middleware(
