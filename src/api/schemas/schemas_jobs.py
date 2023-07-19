@@ -4,6 +4,8 @@ from uuid import UUID
 from pydantic import EmailStr
 from typing import Optional
 from fastapi import UploadFile
+
+
 class Job(BaseModel):
     title: str
     link_for_contact: str
@@ -17,7 +19,6 @@ class Job(BaseModel):
     video: Optional[str] = None
     twitter: Optional[str] = None
     logo: str
-
 
 
 class JobsView(BaseModel):

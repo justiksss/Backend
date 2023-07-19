@@ -6,9 +6,6 @@ from uuid import UUID
 from src.database.models import News
 
 
-
-
-
 async def get_post_info(session: AsyncSession, id_news: UUID) -> dict:
     async with session.begin():
         news_dal = New(session)
@@ -17,10 +14,8 @@ async def get_post_info(session: AsyncSession, id_news: UUID) -> dict:
         path_to_image = f"images/{news.image_path}.png"
 
         if news is not None:
-            return {
-                "image":path_to_image,
-                "text":news
-            }
+            return {"image": path_to_image, "text": news}
+
 
 async def delete_blog_info(session: AsyncSession):
     async with session.begin():
@@ -33,13 +28,9 @@ async def delete_blog_info(session: AsyncSession):
 
 async def get_page(session: AsyncSession, page_size: int, page: int) -> dict:
     async with session.begin():
-
         news_dal = New(session)
 
         selected = await news_dal.get_news_preview(page_size=page_size, page=page)
         length = await session.scalar(select(func.count()).select_from(News))
 
-        return {
-            "total_pages": length // page_size,
-            "all_posts": selected
-        }
+        return {"total_pages": length // page_size, "all_posts": selected}

@@ -5,9 +5,9 @@ from typing import Union
 from src.database.methods.jobs import JobsDal
 from src.database.models import Jobs
 from uuid import UUID
-from sqlalchemy import select,func, or_, and_
+from sqlalchemy import select, func, or_, and_
 from src.api.schemas.filters import Params
-from src.api.schemas.schemas_jobs import Job,Jobs_AddView
+from src.api.schemas.schemas_jobs import Job, Jobs_AddView
 
 
 async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
@@ -17,7 +17,6 @@ async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
         jobs_select = await jobs_dal.get_job_by_uuid(uuid=uuid)
 
         if jobs_select is None:
-
             return f"Job with {uuid} not found"
 
         return jobs_select
@@ -25,8 +24,12 @@ async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
 
 async def main_search(params: Params, session: AsyncSession):
     # Convert company_name and keyword to lowercase for case-insensitive search
-    company_name = params.company_name.lower() if params.company_name != "string" else None
-    keyword = params.keyword.lower().replace(' ', '+') if params.keyword != "string" else None
+    company_name = (
+        params.company_name.lower() if params.company_name != "string" else None
+    )
+    keyword = (
+        params.keyword.lower().replace(" ", "+") if params.keyword != "string" else None
+    )
     job_type = params.job_type.lower() if params.job_type != "string" else None
 
     # Create an asynchronous session
@@ -34,21 +37,21 @@ async def main_search(params: Params, session: AsyncSession):
         # Create a base query
         query = select(Jobs).where(Jobs.is_active == True)  # Add the condition here
 
-        if params.days_ago_posted is not None and params.days_ago_posted != '':
+        if params.days_ago_posted is not None and params.days_ago_posted != "":
             query = query.where(Jobs.posted_days_ago <= int(params.days_ago_posted))
 
         if company_name:
-            query = query.where(func.lower(Jobs.company_name).like(f'%{company_name}%'))
+            query = query.where(func.lower(Jobs.company_name).like(f"%{company_name}%"))
 
         if keyword:
             # Split the keyword into separate words
-            keyword_words = keyword.split('+')
+            keyword_words = keyword.split("+")
 
             # Create a list of OR conditions for each keyword word
             keyword_conditions = [
                 or_(
-                    func.lower(Jobs.company_name).like(f'%{word}%'),
-                    func.lower(Jobs.description).like(f'%{word}%')
+                    func.lower(Jobs.company_name).like(f"%{word}%"),
+                    func.lower(Jobs.description).like(f"%{word}%"),
                 )
                 for word in keyword_words
             ]
@@ -57,13 +60,13 @@ async def main_search(params: Params, session: AsyncSession):
             query = query.where(and_(*keyword_conditions))
 
         if job_type:
-            query = query.where(func.lower(Jobs.job_type).like(f'%{job_type}%'))
+            query = query.where(func.lower(Jobs.job_type).like(f"%{job_type}%"))
 
-        if params.sort_by == 'New jobs':
+        if params.sort_by == "New jobs":
             query = query.order_by(asc(Jobs.posted_days_ago))
-        elif params.sort_by == 'Name descending':
+        elif params.sort_by == "Name descending":
             query = query.order_by(desc(Jobs.name))
-        elif params.sort_by == 'Name ascending':
+        elif params.sort_by == "Name ascending":
             query = query.order_by(asc(Jobs.name))
 
         # Execute the query
@@ -86,16 +89,19 @@ async def main_search(params: Params, session: AsyncSession):
 
         results = []
         for job in jobs:
-            results.append({
-                'id': job.id_job,
-                'keyword': job.name,
-                'job_type': job.job_type,
-                'company_name': job.company_name,
-                'days_ago_posted': job.posted_days_ago,
-                "image": job.logo
-            })
+            results.append(
+                {
+                    "id": job.id_job,
+                    "keyword": job.name,
+                    "job_type": job.job_type,
+                    "company_name": job.company_name,
+                    "days_ago_posted": job.posted_days_ago,
+                    "image": job.logo,
+                }
+            )
 
         return {"total_pages": total_pages, "total_count": total_count, "jobs": results}
+
 
 async def get_all_companies(db: AsyncSession) -> list:
     async with db.begin():
@@ -105,11 +111,24 @@ async def get_all_companies(db: AsyncSession) -> list:
 
 
 async def add_job(session: AsyncSession, job: Job):
-
-    description: str ="<ul>" +"".join([f"<li>{i}</li>" for i in [job.salary
-                                                                      ,job.contact_email
-                                                                      ,job.twitter
-                                                                      ,job.video,job.remote_position] if i is not None]) + "</ul>" + job.description
+    description: str = (
+        "<ul>"
+        + "".join(
+            [
+                f"<li>{i}</li>"
+                for i in [
+                    job.salary,
+                    job.contact_email,
+                    job.twitter,
+                    job.video,
+                    job.remote_position,
+                ]
+                if i is not None
+            ]
+        )
+        + "</ul>"
+        + job.description
+    )
     job_template: Jobs = Jobs(
         name=job.title,
         link=job.link_for_contact,
@@ -117,19 +136,15 @@ async def add_job(session: AsyncSession, job: Job):
         location=job.location,
         description=description,
         company_name=job.company_name,
-        logo=job.logo
-
+        logo=job.logo,
     )
     async with session.begin():
-
         job_dal = JobsDal(db_session=session)
 
         new_job = await job_dal.add_job_after_payment(job=job_template)
 
-        return Jobs_AddView(
-            id_job=new_job.id_job,
-            name=new_job.name
-        )
+        return Jobs_AddView(id_job=new_job.id_job, name=new_job.name)
+
 
 async def get_image_by_uuid(session: AsyncSession, id_news: UUID) -> dict:
     async with session.begin():
@@ -137,22 +152,22 @@ async def get_image_by_uuid(session: AsyncSession, id_news: UUID) -> dict:
 
         jobs = await news_dal.get_job_by_uuid(id_news)
         path = jobs.get("logo")
-        path_to_image = f"/Users/oleksiiyudin/Desktop/Backend/images/images_for_job/{path}"
+        path_to_image = (
+            f"/Users/oleksiiyudin/Desktop/Backend/images/images_for_job/{path}"
+        )
         if jobs is not None:
-            return {
-                "image":path_to_image
-                }
-
-async def get_image_by_name(filename:str) -> dict:
-
-    path_to_image = f"/Users/oleksiiyudin/Desktop/Backend/images/images_for_job/{filename}"
-
-    return {
-        "image": path_to_image
-    }
+            return {"image": path_to_image}
 
 
-async def set_active_job(uuid: UUID, session: AsyncSession) -> Union[UUID,None]:
+async def get_image_by_name(filename: str) -> dict:
+    path_to_image = (
+        f"/Users/oleksiiyudin/Desktop/Backend/images/images_for_job/{filename}"
+    )
+
+    return {"image": path_to_image}
+
+
+async def set_active_job(uuid: UUID, session: AsyncSession) -> Union[UUID, None]:
     async with session.begin():
         # Select the job with the specified UUID
         job = select(Jobs).where(Jobs.id_job == uuid)
@@ -173,6 +188,3 @@ async def set_active_job(uuid: UUID, session: AsyncSession) -> Union[UUID,None]:
             return uuid
         else:
             return None
-
-
-

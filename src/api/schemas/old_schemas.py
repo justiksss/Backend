@@ -18,10 +18,6 @@ class Show_Job(BaseModel):
     company_name: str
 
 
-
-
-
-
 class TunedModel(BaseModel):
     class Config:
         """tells pydantic to convert even non dict obj to json"""
@@ -93,6 +89,3 @@ class UpdateUserRequest(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
-
-
-

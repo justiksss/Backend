@@ -1,5 +1,5 @@
 from logging.config import fileConfig
-from config import DB_PASS,DB_NAME,DB_PORT,DB_HOST,DB_USER
+from config import DB_PASS, DB_NAME, DB_PORT, DB_HOST, DB_USER
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from src.database.models import Base
@@ -9,11 +9,11 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 section = config.config_ini_section
-config.set_section_option(section,"DB_PASS", DB_PASS)
-config.set_section_option(section,"DB_NAME", DB_NAME)
-config.set_section_option(section,"DB_PORT", DB_PORT)
-config.set_section_option(section,"DB_HOST", DB_HOST)
-config.set_section_option(section,"DB_USER", DB_USER)
+config.set_section_option(section, "DB_PASS", DB_PASS)
+config.set_section_option(section, "DB_NAME", DB_NAME)
+config.set_section_option(section, "DB_PORT", DB_PORT)
+config.set_section_option(section, "DB_HOST", DB_HOST)
+config.set_section_option(section, "DB_USER", DB_USER)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -70,9 +70,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

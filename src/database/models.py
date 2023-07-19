@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, String, Boolean, UUID, Text, DateTime, Integer
 from sqlalchemy.dialects.postgresql.array import ARRAY
@@ -7,7 +9,7 @@ Base = declarative_base()
 
 
 class User(Base):
-    __tablename__= "user"
+    __tablename__ = "user"
 
     user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
@@ -19,22 +21,30 @@ class User(Base):
     posted_jobs = Column(ARRAY(String), nullable=True)
 
 
-
 class News(Base):
     __tablename__ = "news"
 
-    id_news = Column(UUID(as_uuid=True),primary_key=True, default=uuid.uuid4)
+    id_news = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     title = Column(Text, nullable=False, unique=True)
     created_at = Column(DateTime, nullable=False)
     description = Column(Text, nullable=False)
     image_path = Column(Text, nullable=False)
 
+    async def to_dict(self):
+        return {
+            "id_news": str(self.id_news),
+            "title": self.title,
+            "created_at": self.created_at.isoformat(),
+            "description": self.description,
+            "image_path": self.image_path,
+        }
+
 
 class Jobs(Base):
     __tablename__ = "jobs"
 
-    id_job = Column(UUID(as_uuid=True),primary_key=True, default=uuid.uuid4)
+    id_job = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     name = Column(Text, nullable=False, unique=True)
     link = Column(String, nullable=False)
@@ -45,7 +55,3 @@ class Jobs(Base):
     logo = Column(String, nullable=False)
     posted_days_ago = Column(Integer, nullable=True)
     is_active = Column(Boolean, nullable=True, default=True)
-
-
-
-

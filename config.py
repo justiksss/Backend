@@ -15,6 +15,3 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 db_url = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-
-

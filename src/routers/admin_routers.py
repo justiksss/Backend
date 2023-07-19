@@ -14,4 +14,3 @@ async def drop_news(db: AsyncSession = Depends(get_db)):
     query = await delete_blog_info(session=db)
 
     return "All done"
-
