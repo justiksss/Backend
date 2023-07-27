@@ -16,10 +16,13 @@ class BlogPanel:
     async def get_bulk_blog(self, page: int, per_page: int) -> dict:
         offset = (page - 1) * per_page
 
-        stmt = select(News.id_news, News.title, News.created_at, News.description, News.image_path)
+        stmt = select(
+            News.id_news, News.title, News.created_at, News.description, News.image_path
+        )
 
-
-        count_stmt = select(func.count()).select_from(News)  # Query to get the total count of posts
+        count_stmt = select(func.count()).select_from(
+            News
+        )  # Query to get the total count of posts
 
         stmt = stmt.limit(per_page).offset(offset)
 
@@ -39,10 +42,12 @@ class BlogPanel:
 
         total_pages = (total_posts + per_page - 1) // per_page
 
-        return {"total_pages" : total_pages,"total_posts":total_posts,"posts":blogs}
+        return {"total_pages": total_pages, "total_posts": total_posts, "posts": blogs}
 
-    async def get_one(self, uuid:UUID) -> SingleNewsModel:
-        stmt = select(News.id_news, News.title, News.created_at, News.description, News.image_path).where(News.id_news == uuid)
+    async def get_one(self, uuid: UUID) -> SingleNewsModel:
+        stmt = select(
+            News.id_news, News.title, News.created_at, News.description, News.image_path
+        ).where(News.id_news == uuid)
 
         query = await self.db.execute(stmt)
         res = query.one()
@@ -52,15 +57,5 @@ class BlogPanel:
             id_news=res.id_news,
             created_at=res.created_at,
             title=res.title,
-            image_path=res.image_path
+            image_path=res.image_path,
         )
-
-
-
-
-
-
-
-
-
-

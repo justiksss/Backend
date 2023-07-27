@@ -26,6 +26,7 @@ selenium = "^4.10.0"
 webdriver-manager = "^3.8.6"
 gunicorn = "^20.1.0"
 fastapi = "^0.100.0"
+black = "^23.7.0"
 
 
 [build-system]

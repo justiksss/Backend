@@ -1,5 +1,5 @@
 from pydantic.types import datetime as PDdate
-from pydantic import BaseModel,validator
+from pydantic import BaseModel, validator
 from uuid import UUID
 from datetime import datetime, timezone
 
@@ -10,8 +10,10 @@ class NewsModel(BaseModel):
     created_at: datetime
     image_path: str
 
+
 class SingleNewsModel(NewsModel):
     description: str
+
 
 class NewsPatch(BaseModel):
     title: str
@@ -30,6 +32,8 @@ class NewsPatch(BaseModel):
 
 class NewsCreate(BaseModel):
     title: str
-    created_at: datetime = datetime.now(timezone.utc).replace(tzinfo=None)  # Set timezone information to None
+    created_at: datetime = datetime.now(timezone.utc).replace(
+        tzinfo=None
+    )  # Set timezone information to None
     description: str
     image_path: str

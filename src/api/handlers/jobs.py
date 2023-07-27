@@ -23,7 +23,6 @@ async def get_one_job(session: AsyncSession, uuid: UUID) -> Union[dict, str]:
 
 
 async def main_search(params: Params, session: AsyncSession):
-    # Convert company_name and keyword to lowercase for case-insensitive search
     company_name = (
         params.company_name.lower() if params.company_name != "string" else None
     )
@@ -32,10 +31,8 @@ async def main_search(params: Params, session: AsyncSession):
     )
     job_type = params.job_type.lower() if params.job_type != "string" else None
 
-    # Create an asynchronous session
     async with session.begin():
-        # Create a base query
-        query = select(Jobs).where(Jobs.is_active == True)  # Add the condition here
+        query = select(Jobs).where(Jobs.is_active == True)
 
         if params.days_ago_posted is not None and params.days_ago_posted != "":
             query = query.where(Jobs.posted_days_ago <= int(params.days_ago_posted))
@@ -44,10 +41,8 @@ async def main_search(params: Params, session: AsyncSession):
             query = query.where(func.lower(Jobs.company_name).like(f"%{company_name}%"))
 
         if keyword:
-            # Split the keyword into separate words
             keyword_words = keyword.split("+")
 
-            # Create a list of OR conditions for each keyword word
             keyword_conditions = [
                 or_(
                     func.lower(Jobs.company_name).like(f"%{word}%"),
@@ -56,7 +51,6 @@ async def main_search(params: Params, session: AsyncSession):
                 for word in keyword_words
             ]
 
-            # Combine the OR conditions with an AND condition
             query = query.where(and_(*keyword_conditions))
 
         if job_type:
@@ -69,20 +63,11 @@ async def main_search(params: Params, session: AsyncSession):
         elif params.sort_by == "Name ascending":
             query = query.order_by(asc(Jobs.name))
 
-        # Execute the query
-        result = await session.execute(query)
-
-        # Fetch the jobs
-        jobs = result.scalars().all()
-
-        # Calculate total count after filters
         count_query = select(func.count()).select_from(query.alias("subquery"))
         total_count = await session.scalar(count_query)
 
-        # Calculate total pages
         total_pages = math.ceil(total_count / params.per_page)
 
-        # Apply pagination
         query = query.limit(params.per_page).offset((params.page - 1) * params.per_page)
         result = await session.execute(query)
         jobs = result.scalars().all()

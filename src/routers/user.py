@@ -112,7 +112,7 @@ async def change_user_role_by_uuid(
         "Subscriber_TIER_1",
         "Subscriber_TIER_2",
         "Subscriber_TIER_3",
-        "Admin"
+        "Admin",
     )
     if new_role not in user_role_list:
         raise HTTPException(status_code=404, detail=f"Not found role:{new_role}")
