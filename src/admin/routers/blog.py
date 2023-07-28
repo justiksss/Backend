@@ -80,7 +80,7 @@ async def create_news(
         raise HTTPException(detail="Permission denied", status_code=403)
     async with db.begin():
         news = News(**news_data.model_dump())
-        db.add(news)
+        await db.add(news)
         await db.flush()  # Use flush() instead of commit()
         await db.refresh(news)
         return news

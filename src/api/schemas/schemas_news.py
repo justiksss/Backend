@@ -8,3 +8,4 @@ class OneNews(BaseModel):
     published_at: datetime
     id_news: UUID
     sentence: str
+    image: str

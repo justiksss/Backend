@@ -44,6 +44,8 @@ class New:
                 sentence=post.description.split(".")[0],
                 id_news=post.id_news,
                 published_at=post.created_at,
+                image=post.image_path
+
             )
             news_list.append(news)
 
